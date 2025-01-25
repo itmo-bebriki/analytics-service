@@ -55,7 +55,7 @@ public class EventHistoryRepository : IEventHistoryRepository
             yield return new PayloadEvent(
                 Id: reader.GetInt64("id"),
                 EventType: reader.GetFieldValue<EventType>("type"),
-                Timestamp: reader.GetDateTime("occurred_at"),
+                Timestamp: reader.GetFieldValue<DateTimeOffset>("occurred_at"),
                 Command: JsonSerializer.Deserialize<BaseCommand>(reader.GetString("payload")) ?? throw new ArgumentException("payload cannot be empty"));
         }
     }

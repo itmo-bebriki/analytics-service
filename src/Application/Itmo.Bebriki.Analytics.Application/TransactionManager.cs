@@ -13,6 +13,32 @@ public class TransactionManager : ITransactionManager
         _logger = logger;
     }
 
+    public async Task<T> RunAsync<T>(
+        Func<Task<T>> task,
+        CancellationToken cancellationToken,
+        IsolationLevel isolationLevel = IsolationLevel.ReadUncommitted)
+    {
+        _logger.LogInformation($"Starting transaction with {isolationLevel.ToString()}");
+
+        using var transaction = new TransactionScope(
+            TransactionScopeOption.Required,
+            new TransactionOptions { IsolationLevel = isolationLevel },
+            TransactionScopeAsyncFlowOption.Enabled);
+
+        try
+        {
+            T result = await task.Invoke();
+            transaction.Complete();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Transaction failed");
+            throw;
+        }
+    }
+
     public async Task RunAsync(
         Func<Task> task,
         CancellationToken cancellationToken,
@@ -33,6 +59,7 @@ public class TransactionManager : ITransactionManager
         catch (Exception ex)
         {
             _logger.LogError(ex, "Transaction failed");
+            throw;
         }
     }
 }
