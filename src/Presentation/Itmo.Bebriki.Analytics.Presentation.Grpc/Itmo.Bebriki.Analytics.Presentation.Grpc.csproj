@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <Folder Include="protos\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Google.Protobuf" />
+        <PackageReference Include="Grpc.AspNetCore"/>
+        <PackageReference Include="Grpc.AspNetCore.Server.Reflection"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf ProtoRoot="protos" Include="protos\**\*.proto" GrpcServices="Server"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Application\Itmo.Bebriki.Analytics.Application.Contracts\Itmo.Bebriki.Analytics.Application.Contracts.csproj"/>
+    </ItemGroup>
+
+</Project>

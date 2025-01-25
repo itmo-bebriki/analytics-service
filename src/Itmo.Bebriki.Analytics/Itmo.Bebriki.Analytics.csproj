@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <ItemGroup>
+        <ProjectReference Include="..\Application\Itmo.Bebriki.Analytics.Application\Itmo.Bebriki.Analytics.Application.csproj"/>
+        <ProjectReference Include="..\Infrastructure\Itmo.Bebriki.Analytics.Infrastructure.Persistence\Itmo.Bebriki.Analytics.Infrastructure.Persistence.csproj"/>
+        <ProjectReference Include="..\Presentation\Itmo.Bebriki.Analytics.Presentation.Grpc\Itmo.Bebriki.Analytics.Presentation.Grpc.csproj"/>
+        <ProjectReference Include="..\Presentation\Itmo.Bebriki.Analytics.Presentation.Kafka\Itmo.Bebriki.Analytics.Presentation.Kafka.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Itmo.Dev.Platform.Observability" />
+        <PackageReference Include="Itmo.Dev.Platform.BackgroundTasks.Hangfire.Postgres" />
+        <PackageReference Include="Itmo.Dev.Platform.BackgroundTasks.Postgres" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
+        <PackageReference Include="Swashbuckle.AspNetCore" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Update="appsettings.*.json">
+            <DependentUpon>appsettings.json</DependentUpon>
+        </Content>
+    </ItemGroup>
+
+</Project>

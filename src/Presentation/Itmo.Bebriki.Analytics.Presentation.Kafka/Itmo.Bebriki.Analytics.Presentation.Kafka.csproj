@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="Google.Protobuf" />
+        <PackageReference Include="Grpc.Tools"/>
+        <PackageReference Include="Itmo.Dev.Platform.Kafka"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="protos\*.proto" GrpcServices="None"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Application\Itmo.Bebriki.Analytics.Application.Contracts\Itmo.Bebriki.Analytics.Application.Contracts.csproj"/>
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+option csharp_namespace = "Itmo.Bebriki.Analytics.Kafka.Contracts";
+
+package itmo.bebriki.analytics.kafka;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+message JobTaskInfoKey {
+  int64 job_task_id = 1;
+}
+
+message JobTaskInfoValue {
+  oneof event {
+    JobTaskCreated job_task_created = 1;
+    JobTaskUpdated job_task_updated = 2;
+    JobTaskDependenciesAdded job_task_dependencies_added = 3;
+    JobTaskDependenciesRemoved job_task_dependencies_removed = 4;
+  }
+
+  message JobTaskCreated {
+    int64 job_task_id = 1;
+    string title = 2;
+    string description = 3;
+    int64 assignee_id = 4;
+    JobTaskPriority priority = 5;
+    repeated int64 depend_on_task_ids = 6;
+    google.protobuf.Timestamp dead_line = 7;
+    google.protobuf.Timestamp created_at = 8;
+  }
+
+  message JobTaskUpdated {
+    int64 job_task_id = 1;
+    google.protobuf.StringValue title = 2;
+    google.protobuf.StringValue description = 3;
+    google.protobuf.Int64Value assignee_id = 4;
+    JobTaskState state = 5;
+    JobTaskPriority priority = 6;
+    google.protobuf.Timestamp dead_line = 7;
+    google.protobuf.BoolValue is_agreed = 8;
+    google.protobuf.Timestamp updated_at = 9;
+  }
+
+  message JobTaskDependenciesAdded {
+    int64 job_task_id = 1;
+    repeated int64 added_dependencies = 2;
+  }
+
+  message JobTaskDependenciesRemoved {
+    int64 job_task_id = 1;
+    repeated int64 removed_dependencies = 2;
+  }
+}
+
+enum JobTaskState {
+  JOB_TASK_STATE_UNSPECIFIED = 0;
+  JOB_TASK_STATE_BACKLOG = 1;
+  JOB_TASK_STATE_TO_DO = 2;
+  JOB_TASK_STATE_IN_PROGRESS = 3;
+  JOB_TASK_STATE_IN_REVIEW = 4;
+  JOB_TASK_STATE_DONE = 5;
+  JOB_TASK_STATE_CLOSED = 6;
+}
+
+enum JobTaskPriority {
+  JOB_TASK_PRIORITY_UNSPECIFIED = 0;
+  JOB_TASK_PRIORITY_LOW = 1;
+  JOB_TASK_PRIORITY_MEDIUM = 2;
+  JOB_TASK_PRIORITY_HIGH = 3;
+  JOB_TASK_PRIORITY_CRITICAL = 4;
+}
