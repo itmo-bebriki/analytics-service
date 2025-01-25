@@ -8,4 +8,5 @@ public sealed partial record FetchQuery(
     long[] Ids,
     EventType[] Types,
     DateTimeOffset? FromTimestamp,
-    DateTimeOffset? ToTimestamp);
+    DateTimeOffset? ToTimestamp,
+    [RequiredValue] int PageSize);

@@ -1,4 +1,4 @@
-using Itmo.Bebriki.Analytics.Application.Contracts.Commands;
+using Itmo.Bebriki.Analytics.Application.Models.Commands;
 using Itmo.Bebriki.Analytics.Kafka.Contracts;
 using Itmo.Dev.Platform.Kafka.Consumer;
 
@@ -14,7 +14,7 @@ public static class CreateJobTaskMapper
             Title: message.Value.JobTaskCreated.Title,
             Description: message.Value.JobTaskCreated.Description,
             AssigneeId: message.Value.JobTaskCreated.AssigneeId,
-            Priority: JobTaskPriorityMapper.ToInternal(message.Value.JobTaskCreated.Priority),
+            Priority: JobTaskPriorityMapper.ToInternal(message.Value.JobTaskCreated.Priority) ?? throw new ArgumentException("Invalid job task priority."),
             DependsOnIds: message.Value.JobTaskCreated.DependOnTaskIds.ToArray(),
             CreatedAt: message.Value.JobTaskCreated.CreatedAt.ToDateTimeOffset(),
             Deadline: message.Value.JobTaskCreated.DeadLine.ToDateTimeOffset());

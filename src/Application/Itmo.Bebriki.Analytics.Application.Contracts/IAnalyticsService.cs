@@ -1,4 +1,4 @@
-using Itmo.Bebriki.Analytics.Application.Contracts.Commands;
+using Itmo.Bebriki.Analytics.Application.Models.Commands;
 
 namespace Itmo.Bebriki.Analytics.Application.Contracts;
 

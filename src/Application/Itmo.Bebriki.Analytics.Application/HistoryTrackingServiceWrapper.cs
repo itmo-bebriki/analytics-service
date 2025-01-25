@@ -1,10 +1,8 @@
 using Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Queries;
 using Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Repositories;
 using Itmo.Bebriki.Analytics.Application.Contracts;
-using Itmo.Bebriki.Analytics.Application.Contracts.Commands;
+using Itmo.Bebriki.Analytics.Application.Models.Commands;
 using Itmo.Bebriki.Analytics.Application.Models.EventHistory;
-using Itmo.Bebriki.Analytics.Application.Models.EventHistory.Events;
-using System.Text.Json;
 
 namespace Itmo.Bebriki.Analytics.Application;
 
@@ -31,7 +29,7 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
                     Id: command.JobTaskId,
                     EventType: EventType.Creation,
                     Timestamp: command.CreatedAt,
-                    Payload: JsonSerializer.Serialize(command))),
+                    Command: command)),
             cancellationToken);
     }
 
@@ -45,7 +43,7 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
                     Id: command.JobTaskId,
                     EventType: EventType.Update,
                     Timestamp: command.UpdatedAt,
-                    Payload: JsonSerializer.Serialize(command))),
+                    Command: command)),
             cancellationToken);
     }
 
@@ -60,7 +58,7 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
                     Id: command.JobTaskId,
                     EventType: EventType.NewDependency,
                     Timestamp: DateTimeOffset.Now,
-                    Payload: JsonSerializer.Serialize(command))),
+                    Command: command)),
             cancellationToken);
     }
 
@@ -75,7 +73,7 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
                     Id: command.JobTaskId,
                     EventType: EventType.PruneDependency,
                     Timestamp: DateTimeOffset.Now,
-                    Payload: JsonSerializer.Serialize(command))),
+                    Command: command)),
             cancellationToken);
     }
 }

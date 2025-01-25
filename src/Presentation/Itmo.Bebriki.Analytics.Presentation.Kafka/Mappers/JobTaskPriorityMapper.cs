@@ -1,10 +1,10 @@
-using Itmo.Bebriki.Analytics.Application.Models;
+using Itmo.Bebriki.Analytics.Application.Models.JobTask;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Kafka.Mappers;
 
 public static class JobTaskPriorityMapper
 {
-    public static JobTaskPriority ToInternal(
+    public static JobTaskPriority? ToInternal(
         Itmo.Bebriki.Analytics.Kafka.Contracts.JobTaskPriority jobTaskPriority)
     {
         return jobTaskPriority switch
@@ -13,10 +13,7 @@ public static class JobTaskPriorityMapper
             Analytics.Kafka.Contracts.JobTaskPriority.Medium => JobTaskPriority.Medium,
             Analytics.Kafka.Contracts.JobTaskPriority.High => JobTaskPriority.High,
             Analytics.Kafka.Contracts.JobTaskPriority.Critical => JobTaskPriority.Critical,
-            Analytics.Kafka.Contracts.JobTaskPriority.Unspecified => throw new ArgumentOutOfRangeException(
-                nameof(jobTaskPriority),
-                jobTaskPriority,
-                null),
+            Analytics.Kafka.Contracts.JobTaskPriority.Unspecified => null,
             _ => throw new ArgumentOutOfRangeException(nameof(jobTaskPriority), jobTaskPriority, null),
         };
     }

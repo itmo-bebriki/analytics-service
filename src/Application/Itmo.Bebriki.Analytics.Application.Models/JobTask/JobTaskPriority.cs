@@ -1,4 +1,4 @@
-namespace Itmo.Bebriki.Analytics.Application.Models;
+namespace Itmo.Bebriki.Analytics.Application.Models.JobTask;
 
 public enum JobTaskPriority
 {

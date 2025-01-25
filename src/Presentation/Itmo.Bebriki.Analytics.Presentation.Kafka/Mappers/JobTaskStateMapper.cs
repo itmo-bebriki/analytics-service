@@ -1,10 +1,10 @@
-using Itmo.Bebriki.Analytics.Application.Models;
+using Itmo.Bebriki.Analytics.Application.Models.JobTask;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Kafka.Mappers;
 
 public static class JobTaskStateMapper
 {
-    public static JobTaskState ToInternal(Analytics.Kafka.Contracts.JobTaskState jobTaskState)
+    public static JobTaskState? ToInternal(Analytics.Kafka.Contracts.JobTaskState jobTaskState)
     {
         return jobTaskState switch
         {
@@ -14,10 +14,7 @@ public static class JobTaskStateMapper
             Analytics.Kafka.Contracts.JobTaskState.InReview => JobTaskState.InReview,
             Analytics.Kafka.Contracts.JobTaskState.Done => JobTaskState.Done,
             Analytics.Kafka.Contracts.JobTaskState.Closed => JobTaskState.Closed,
-            Analytics.Kafka.Contracts.JobTaskState.Unspecified => throw new ArgumentOutOfRangeException(
-                nameof(jobTaskState),
-                jobTaskState,
-                null),
+            Analytics.Kafka.Contracts.JobTaskState.Unspecified => null,
             _ => throw new ArgumentOutOfRangeException(nameof(jobTaskState), jobTaskState, null),
         };
     }

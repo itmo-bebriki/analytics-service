@@ -1,6 +1,6 @@
-using Itmo.Bebriki.Analytics.Application.Models;
+using Itmo.Bebriki.Analytics.Application.Models.JobTask;
 
-namespace Itmo.Bebriki.Analytics.Application.Contracts.Commands;
+namespace Itmo.Bebriki.Analytics.Application.Models.Commands;
 
 public record CreateJobTaskCommand(
     long JobTaskId,
@@ -10,4 +10,5 @@ public record CreateJobTaskCommand(
     JobTaskPriority Priority,
     long[] DependsOnIds,
     DateTimeOffset Deadline,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt)
+    : BaseCommand(JobTaskId);
