@@ -5,7 +5,7 @@ namespace Itmo.Bebriki.Analytics.Application.Contracts;
 
 public interface IAnalyticsService
 {
-    public Task<TaskAnalytics> GetAnalyticsByIdAsync(long id, CancellationToken cancellationToken);
+    public Task<TaskAnalytics?> GetAnalyticsByIdAsync(long id, CancellationToken cancellationToken);
 
     public Task ProcessCreationAsync(CreateJobTaskCommand command, CancellationToken cancellationToken);
 

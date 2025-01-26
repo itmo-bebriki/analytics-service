@@ -5,23 +5,19 @@ using Itmo.Bebriki.Analytics.Application.Models.Analytics;
 using Itmo.Bebriki.Analytics.Grpc.Contracts;
 using Itmo.Bebriki.Analytics.Presentation.Grpc.Mapper;
 using Microsoft.Extensions.Logging;
-using System.Transactions;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Grpc.Controllers;
 
 public class AnalyticsController : TaskAnalyticsService.TaskAnalyticsServiceBase
 {
     private readonly IAnalyticsService _analyticsService;
-    private readonly ITransactionManager _transactionManager;
     private readonly ILogger<AnalyticsController> _logger;
 
     public AnalyticsController(
         IAnalyticsService analyticsService,
-        ITransactionManager transactionManager,
         ILogger<AnalyticsController> logger)
     {
         _analyticsService = analyticsService;
-        _transactionManager = transactionManager;
         _logger = logger;
     }
 
@@ -31,19 +27,19 @@ public class AnalyticsController : TaskAnalyticsService.TaskAnalyticsServiceBase
     {
         _logger.LogInformation($"Requesting analytics for {request.TaskId}");
 
-        TaskAnalytics analytics = await _transactionManager.RunAsync(
-            async () => await _analyticsService.GetAnalyticsByIdAsync(request.TaskId, context.CancellationToken),
-            context.CancellationToken,
-            IsolationLevel.RepeatableRead);
+        TaskAnalytics? analytics = await _analyticsService.GetAnalyticsByIdAsync(request.TaskId, context.CancellationToken);
+
+        if (analytics == null)
+            throw new RpcException(new Status(StatusCode.NotFound, $"Task {request.TaskId} not found"));
 
         return new GetAnalyticsResponse
         {
-            CreatedAt = analytics.CreatedAt.ToTimestamp(),
-            LastUpdate = analytics.LastUpdate.ToTimestamp(),
-            StartedAt = analytics.StartedAt.ToTimestamp(),
-            TimeSpent = analytics.TimeSpent.ToDuration(),
-            HighestPriority = JobTaskPriorityMapper.ToGrpc(analytics.HighestPriority),
-            CurrentState = JobTaskStateMapper.ToGrpc(analytics.CurrentState),
+            CreatedAt = analytics.CreatedAt?.ToTimestamp(),
+            LastUpdate = analytics.LastUpdate?.ToTimestamp(),
+            StartedAt = analytics.StartedAt?.ToTimestamp(),
+            TimeSpent = analytics.TimeSpent?.ToDuration(),
+            HighestPriority = analytics.HighestPriority is not null ? JobTaskPriorityMapper.ToGrpc((Application.Models.JobTask.JobTaskPriority)analytics.HighestPriority) : JobTaskPriority.Unspecified,
+            CurrentState = analytics.CurrentState is not null ? JobTaskStateMapper.ToGrpc((Application.Models.JobTask.JobTaskState)analytics.CurrentState) : JobTaskState.Unspecified,
             AmountOfAgreements = analytics.AmountOfAgreements,
             TotalUpdates = analytics.TotalUpdates,
             AmountOfUniqueAssignees = analytics.AmountOfUniqueAssignees,

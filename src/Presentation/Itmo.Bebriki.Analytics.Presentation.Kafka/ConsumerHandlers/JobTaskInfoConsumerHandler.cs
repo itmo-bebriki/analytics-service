@@ -3,32 +3,28 @@ using Itmo.Bebriki.Analytics.Kafka.Contracts;
 using Itmo.Bebriki.Analytics.Presentation.Kafka.Mappers;
 using Itmo.Dev.Platform.Kafka.Consumer;
 using Microsoft.Extensions.Logging;
-using System.Transactions;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Kafka.ConsumerHandlers;
 
 public class JobTaskInfoConsumerHandler
-    : IKafkaConsumerHandler<JobTaskInfoKey, JobTaskInfoValue>
+    : IKafkaInboxHandler<JobTaskInfoKey, JobTaskInfoValue>
 {
     private readonly ILogger<JobTaskInfoConsumerHandler> _logger;
     private readonly IAnalyticsService _service;
-    private readonly ITransactionManager _transactionManager;
 
     public JobTaskInfoConsumerHandler(
         IAnalyticsService service,
-        ITransactionManager transactionManager,
         ILogger<JobTaskInfoConsumerHandler> logger)
     {
         _service = service;
-        _transactionManager = transactionManager;
         _logger = logger;
     }
 
     public async ValueTask HandleAsync(
-        IEnumerable<IKafkaConsumerMessage<JobTaskInfoKey, JobTaskInfoValue>> messages,
+        IEnumerable<IKafkaInboxMessage<JobTaskInfoKey, JobTaskInfoValue>> messages,
         CancellationToken cancellationToken)
     {
-        foreach (IKafkaConsumerMessage<JobTaskInfoKey, JobTaskInfoValue> message in messages)
+        foreach (IKafkaInboxMessage<JobTaskInfoKey, JobTaskInfoValue> message in messages)
         {
             switch (message.Value.EventCase)
             {
@@ -52,60 +48,48 @@ public class JobTaskInfoConsumerHandler
     }
 
     private async Task HandleCreation(
-        IKafkaConsumerMessage<JobTaskInfoKey, JobTaskInfoValue> message,
+        IKafkaInboxMessage<JobTaskInfoKey, JobTaskInfoValue> message,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Creating job task {message.Value.JobTaskCreated.JobTaskId}");
 
-        await _transactionManager.RunAsync(
-            async () => await _service.ProcessCreationAsync(
-                CreateJobTaskMapper.ToCommand(message),
-                cancellationToken),
-            cancellationToken,
-            isolationLevel: IsolationLevel.ReadUncommitted);
+        await _service.ProcessCreationAsync(
+            CreateJobTaskMapper.ToCommand(message),
+            cancellationToken);
     }
 
     private async Task HandleUpdate(
-        IKafkaConsumerMessage<JobTaskInfoKey, JobTaskInfoValue> message,
+        IKafkaInboxMessage<JobTaskInfoKey, JobTaskInfoValue> message,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Updating job task {message.Value.JobTaskUpdated.JobTaskId}");
 
-        await _transactionManager.RunAsync(
-            async () => await _service.ProcessUpdateAsync(
-                UpdateJobTaskMapper.ToCommand(message),
-                cancellationToken),
-            cancellationToken,
-            isolationLevel: IsolationLevel.RepeatableRead);
+        await _service.ProcessUpdateAsync(
+            UpdateJobTaskMapper.ToCommand(message),
+            cancellationToken);
     }
 
     private async Task HandleNewDependency(
-        IKafkaConsumerMessage<JobTaskInfoKey, JobTaskInfoValue> message,
+        IKafkaInboxMessage<JobTaskInfoKey, JobTaskInfoValue> message,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Adding new dependency {message.Value.JobTaskDependenciesAdded.AddedDependencies} " +
                                $"to {message.Value.JobTaskDependenciesAdded.JobTaskId}");
 
-        await _transactionManager.RunAsync(
-            async () => await _service.ProcessNewDependencyAsync(
-                DependencyCommandMapper.ToCommand(message),
-                cancellationToken),
-            cancellationToken,
-            isolationLevel: IsolationLevel.RepeatableRead);
+        await _service.ProcessNewDependencyAsync(
+            DependencyCommandMapper.ToCommand(message),
+            cancellationToken);
     }
 
     private async Task HandlePruneDependency(
-        IKafkaConsumerMessage<JobTaskInfoKey, JobTaskInfoValue> message,
+        IKafkaInboxMessage<JobTaskInfoKey, JobTaskInfoValue> message,
         CancellationToken cancellationToken)
     {
         _logger.LogInformation($"Adding new dependency {message.Value.JobTaskDependenciesRemoved.RemovedDependencies} " +
                                $"to {message.Value.JobTaskDependenciesRemoved.JobTaskId}");
 
-        await _transactionManager.RunAsync(
-            async () => await _service.ProcessNewDependencyAsync(
-                DependencyCommandMapper.ToCommand(message),
-                cancellationToken),
-            cancellationToken,
-            isolationLevel: IsolationLevel.RepeatableRead);
+        await _service.ProcessNewDependencyAsync(
+            DependencyCommandMapper.ToCommand(message),
+            cancellationToken);
     }
 }

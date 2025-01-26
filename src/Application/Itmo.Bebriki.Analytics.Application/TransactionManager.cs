@@ -1,15 +1,20 @@
 using Itmo.Bebriki.Analytics.Application.Contracts;
+using Itmo.Dev.Platform.Persistence.Abstractions.Transactions;
 using Microsoft.Extensions.Logging;
-using System.Transactions;
+using System.Data;
 
 namespace Itmo.Bebriki.Analytics.Application;
 
 public class TransactionManager : ITransactionManager
 {
+    private readonly IPersistenceTransactionProvider _transactionProvider;
     private readonly ILogger<TransactionManager> _logger;
 
-    public TransactionManager(ILogger<TransactionManager> logger)
+    public TransactionManager(
+        IPersistenceTransactionProvider transactionProvider,
+        ILogger<TransactionManager> logger)
     {
+        _transactionProvider = transactionProvider;
         _logger = logger;
     }
 
@@ -20,21 +25,21 @@ public class TransactionManager : ITransactionManager
     {
         _logger.LogInformation($"Starting transaction with {isolationLevel.ToString()}");
 
-        using var transaction = new TransactionScope(
-            TransactionScopeOption.Required,
-            new TransactionOptions { IsolationLevel = isolationLevel },
-            TransactionScopeAsyncFlowOption.Enabled);
+        await using IPersistenceTransaction transaction = await _transactionProvider.BeginTransactionAsync(
+            isolationLevel,
+            cancellationToken);
 
         try
         {
             T result = await task.Invoke();
-            transaction.Complete();
+            await transaction.CommitAsync(cancellationToken);
 
             return result;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Transaction failed");
+            await transaction.RollbackAsync(cancellationToken);
             throw;
         }
     }
@@ -46,19 +51,19 @@ public class TransactionManager : ITransactionManager
     {
         _logger.LogInformation($"Starting transaction with {isolationLevel.ToString()}");
 
-        using var transaction = new TransactionScope(
-            TransactionScopeOption.Required,
-            new TransactionOptions { IsolationLevel = isolationLevel },
-            TransactionScopeAsyncFlowOption.Enabled);
+        await using IPersistenceTransaction transaction = await _transactionProvider.BeginTransactionAsync(
+            isolationLevel,
+            cancellationToken);
 
         try
         {
             await task.Invoke();
-            transaction.Complete();
+            await transaction.CommitAsync(cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Transaction failed");
+            await transaction.RollbackAsync(cancellationToken);
             throw;
         }
     }

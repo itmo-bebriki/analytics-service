@@ -1,12 +1,10 @@
 using Itmo.Bebriki.Analytics.Application.Models.EventHistory;
-using SourceKit.Generators.Builder.Annotations;
 
 namespace Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Queries;
 
-[GenerateBuilder]
-public sealed partial record FetchQuery(
+public sealed record FetchQuery(
     long[] Ids,
     EventType[] Types,
     DateTimeOffset? FromTimestamp,
     DateTimeOffset? ToTimestamp,
-    [RequiredValue] int PageSize);
+    int PageSize);

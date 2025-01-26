@@ -26,13 +26,13 @@ public class EventHistoryRepository : IEventHistoryRepository
     {
         const string sql = """
         SELECT
-            eh.id,
+            eh.job_task_id,
             eh.type,
             eh.occurred_at,
             eh.payload
         FROM event_history AS eh
         WHERE
-            (CARDINALITY(:ids) = 0 OR eh.id = ANY(:ids))
+            (CARDINALITY(:ids) = 0 OR eh.job_task_id = ANY(:ids))
             AND (CARDINALITY(:types) = 0 OR eh.type = ANY(:types))
             AND (:from_timestamp IS NULL OR eh.from_timestamp >= :from_timestamp)
             AND (:to_timestamp IS NULL OR eh.to_timestamp <= :to_timestamp)
@@ -65,14 +65,19 @@ public class EventHistoryRepository : IEventHistoryRepository
         CancellationToken cancellationToken)
     {
         const string sql = """
-        INSERT INTO event_history
-        VALUES (:id, :evt_type, :occurred_at, :payload);
+        INSERT INTO event_history (
+            job_task_id,
+            type,
+            occurred_at,
+            payload
+        )
+        VALUES (:job_task_id, :evt_type, :occurred_at, :payload::jsonb);
         """;
 
         await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
         await using IPersistenceCommand cmd = conn.CreateCommand(sql)
-            .AddParameter("id", ctx.Event.Id)
+            .AddParameter("job_task_id", ctx.Event.Id)
             .AddParameter("evt_type", ctx.Event.EventType)
             .AddParameter("occurred_at", ctx.Event.Timestamp)
             .AddParameter("payload", JsonSerializer.Serialize(ctx.Event.Command));

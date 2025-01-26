@@ -18,7 +18,7 @@ public class AnalyticsRepository : IAnalyticsRepository
         _connectionProvider = connectionProvider;
     }
 
-    public async Task<TaskAnalytics> QueryAsync(FetchAnalyticsQuery ctx, CancellationToken cancellationToken)
+    public async Task<TaskAnalytics?> QueryAsync(FetchAnalyticsQuery ctx, CancellationToken cancellationToken)
     {
         const string sql = """
         SELECT
@@ -31,8 +31,8 @@ public class AnalyticsRepository : IAnalyticsRepository
             ta.current_state,
             ta.amount_of_agreements,
             ta.total_updates,
-            array_length(ta.assignees, 1) AS amount_of_unique_assignees,
-            array_length(ta.dependencies, 1) AS amount_of_unique_dependencies
+            COALESCE(array_length(ta.assignees, 1), 0) AS amount_of_unique_assignees,
+            COALESCE(array_length(ta.dependencies, 1), 0) AS amount_of_unique_dependencies
         FROM task_analytics AS ta
         WHERE ta.id = :id;
         """;
@@ -44,14 +44,19 @@ public class AnalyticsRepository : IAnalyticsRepository
 
         await using DbDataReader reader = await cmd.ExecuteReaderAsync(cancellationToken);
 
+        if (!reader.HasRows)
+            return null;
+
+        await reader.ReadAsync(cancellationToken);
+
         return new TaskAnalytics(
             Id: reader.GetInt64("id"),
-            CreatedAt: reader.GetFieldValue<DateTimeOffset>("created_at"),
-            LastUpdate: reader.GetFieldValue<DateTimeOffset>("last_update"),
-            StartedAt: reader.GetFieldValue<DateTimeOffset>("started_at"),
-            TimeSpent: reader.GetFieldValue<TimeSpan>("time_spent"),
-            HighestPriority: reader.GetFieldValue<JobTaskPriority>("highest_priority"),
-            CurrentState: reader.GetFieldValue<JobTaskState>("current_state"),
+            CreatedAt: reader.IsDBNull("created_at") ? null : reader.GetFieldValue<DateTimeOffset>("created_at"),
+            LastUpdate: reader.IsDBNull("last_update") ? null : reader.GetFieldValue<DateTimeOffset>("last_update"),
+            StartedAt: reader.IsDBNull("started_at") ? null : reader.GetFieldValue<DateTimeOffset>("started_at"),
+            TimeSpent: reader.IsDBNull("time_spent") ? null : reader.GetFieldValue<TimeSpan>("time_spent"),
+            HighestPriority: reader.IsDBNull("highest_priority") ? null : reader.GetFieldValue<JobTaskPriority?>("highest_priority"),
+            CurrentState: reader.IsDBNull("current_state") ? null : reader.GetFieldValue<JobTaskState?>("current_state"),
             AmountOfAgreements: reader.GetInt32("amount_of_agreements"),
             TotalUpdates: reader.GetInt32("total_updates"),
             AmountOfUniqueAssignees: reader.GetInt32("amount_of_unique_assignees"),
@@ -61,26 +66,38 @@ public class AnalyticsRepository : IAnalyticsRepository
     public async Task UpsertAsync(UpsertAnalyticsQuery ctx, CancellationToken cancellationToken)
     {
         const string sql = """
-        INSERT INTO task_analytics
-        VALUES (
-            COALESCE(:created_at, task_analytics.created_at),
-            COALESCE(:last_update, task_analytics.last_update),
-            COALESCE(:started_at, task_analytics.started_at),
-            COALESCE(:time_spent, task_analytics.time_spent),
-            COALESCE(:highest_priority, task_analytics.highest_priority),
-            COALESCE(:current_state, task_analytics.current_state),
-            COALESCE(:amount_of_agreements, task_analytics.amount_of_agreements),
-            COALESCE(:total_updates, task_analytics.total_updates)
+        INSERT INTO task_analytics (
+            id,
+            created_at,
+            last_update,
+            started_at,
+            time_spent,
+            highest_priority,
+            current_state,
+            amount_of_agreements,
+            total_updates
         )
-        ON CONFLICT (id) DO UPDATE
-        SET created_at = EXCLUDED.created_at,
-            last_update = EXCLUDED.last_update,
-            started_at = EXCLUDED.started_at,
-            time_spent = EXCLUDED.time_spent,
-            highest_priority = EXCLUDED.highest_priority,
-            current_state = EXCLUDED.current_state,
-            amount_of_agreements = EXCLUDED.amount_of_agreements,
-            total_updates = EXCLUDED.total_updates;
+        VALUES (
+            :id,
+            :created_at,
+            :last_update,
+            :started_at,
+            :time_spent,
+            :highest_priority,
+            :current_state,
+            :amount_of_agreements,
+            :total_updates
+        )
+        ON CONFLICT ON CONSTRAINT task_analytics_pkey
+        DO UPDATE
+        SET created_at = COALESCE(EXCLUDED.created_at, task_analytics.created_at),
+            last_update = COALESCE(EXCLUDED.last_update, task_analytics.last_update),
+            started_at = COALESCE(EXCLUDED.started_at, task_analytics.started_at),
+            time_spent = COALESCE(EXCLUDED.time_spent, task_analytics.time_spent),
+            highest_priority = COALESCE(EXCLUDED.highest_priority, task_analytics.highest_priority),
+            current_state = COALESCE(EXCLUDED.current_state, task_analytics.current_state),
+            amount_of_agreements = COALESCE(EXCLUDED.amount_of_agreements, task_analytics.amount_of_agreements),
+            total_updates = COALESCE(EXCLUDED.total_updates, task_analytics.total_updates);
         """;
 
         await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);
@@ -107,8 +124,8 @@ public class AnalyticsRepository : IAnalyticsRepository
 
         const string sql = """
         UPDATE task_analytics
-        SET task_analytics.dependencies = task_analytics.dependencies || :dependency_ids
-        WHERE task_analytics.id = :id;
+        SET dependencies = dependencies || :dependency_ids
+        WHERE id = :id;
         """;
 
         await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);
@@ -124,10 +141,8 @@ public class AnalyticsRepository : IAnalyticsRepository
     {
         const string sql = """
         UPDATE task_analytics
-        SET task_analytics.dependencies = array_agg(element)
-        FROM unnest(task_analytics.dependencies) AS element
-        WHERE task_analytics.id = :id
-            AND element <> ALL(:dependency_ids);
+        SET dependencies = array_diff(dependencies, :dependency_ids)
+        WHERE id = :id;
         """;
 
         await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);
@@ -146,8 +161,8 @@ public class AnalyticsRepository : IAnalyticsRepository
 
         const string sql = """
         UPDATE task_analytics
-        SET task_analytics.assignees = array_append(task_analytics.assignees, :assignee_id)
-        WHERE task_analytics.id = :id;
+        SET assignees = array_append(assignees, :assignee_id)
+        WHERE id = :id;
         """;
 
         await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);
@@ -163,8 +178,8 @@ public class AnalyticsRepository : IAnalyticsRepository
     {
         const string sql = """
         UPDATE task_analytics
-        SET task_analytics.assignees = array_remove(task_analytics.assignees, :assignee_id)
-        WHERE task_analytics.id = :id;
+        SET assignees = array_remove(assignees, :assignee_id)
+        WHERE id = :id;
         """;
 
         await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);

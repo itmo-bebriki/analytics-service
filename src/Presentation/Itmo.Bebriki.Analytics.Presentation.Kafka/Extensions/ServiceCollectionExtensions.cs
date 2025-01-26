@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
                 .WithConfiguration(configuration.GetSection($"{consumerKey}:JobTaskInfo"))
                 .DeserializeKeyWithProto()
                 .DeserializeValueWithProto()
-                .HandleWith<JobTaskInfoConsumerHandler>()));
+                .HandleInboxWith<JobTaskInfoConsumerHandler>()));
 
         return collection;
     }

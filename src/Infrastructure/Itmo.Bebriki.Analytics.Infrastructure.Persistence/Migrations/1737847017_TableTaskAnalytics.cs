@@ -13,7 +13,7 @@ public class TableTaskAnalytics : SqlMigration
         return
         """
         CREATE TABLE task_analytics (
-            id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+            id BIGINT PRIMARY KEY NOT NULL,
             created_at TIMESTAMP WITH TIME ZONE,
             last_update TIMESTAMP WITH TIME ZONE,
             started_at TIMESTAMP WITH TIME ZONE,
@@ -25,6 +25,13 @@ public class TableTaskAnalytics : SqlMigration
             assignees BIGINT[] DEFAULT ARRAY[]::BIGINT[],
             dependencies BIGINT[] DEFAULT ARRAY[]::BIGINT[]
         );
+
+        CREATE OR REPLACE FUNCTION array_diff(array1 anyarray, array2 anyarray)
+        RETURNS anyarray LANGUAGE SQL IMMUTABLE AS $$
+               SELECT COALESCE(array_agg(elem), '{}')
+               FROM UNNEST(array1) elem
+               WHERE elem <> ALL(array2)
+        $$;
         """;
     }
 

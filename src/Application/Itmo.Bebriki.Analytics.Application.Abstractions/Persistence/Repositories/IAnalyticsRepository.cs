@@ -5,7 +5,7 @@ namespace Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Repositori
 
 public interface IAnalyticsRepository
 {
-    public Task<TaskAnalytics> QueryAsync(FetchAnalyticsQuery ctx, CancellationToken cancellationToken);
+    public Task<TaskAnalytics?> QueryAsync(FetchAnalyticsQuery ctx, CancellationToken cancellationToken);
 
     public Task UpsertAsync(UpsertAnalyticsQuery ctx, CancellationToken cancellationToken);
 

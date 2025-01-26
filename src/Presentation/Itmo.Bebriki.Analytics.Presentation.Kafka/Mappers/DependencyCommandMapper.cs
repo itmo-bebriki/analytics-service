@@ -7,7 +7,7 @@ namespace Itmo.Bebriki.Analytics.Presentation.Kafka.Mappers;
 public static class DependencyCommandMapper
 {
     public static DependencyCommand ToCommand(
-        IKafkaConsumerMessage<JobTaskInfoKey, JobTaskInfoValue> message)
+        IKafkaInboxMessage<JobTaskInfoKey, JobTaskInfoValue> message)
     {
         if (message.Value.EventCase == JobTaskInfoValue.EventOneofCase.JobTaskDependenciesAdded)
         {

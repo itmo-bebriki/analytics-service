@@ -7,7 +7,7 @@ namespace Itmo.Bebriki.Analytics.Presentation.Kafka.Mappers;
 public static class UpdateJobTaskMapper
 {
     public static UpdateJobTaskCommand ToCommand(
-        IKafkaConsumerMessage<JobTaskInfoKey, JobTaskInfoValue> message)
+        IKafkaInboxMessage<JobTaskInfoKey, JobTaskInfoValue> message)
     {
         return new UpdateJobTaskCommand(
             JobTaskId: message.Key.JobTaskId,
@@ -16,7 +16,7 @@ public static class UpdateJobTaskMapper
             AssigneeId: message.Value.JobTaskUpdated.AssigneeId,
             State: JobTaskStateMapper.ToInternal(message.Value.JobTaskUpdated.State),
             Priority: JobTaskPriorityMapper.ToInternal(message.Value.JobTaskUpdated.Priority),
-            Deadline: message.Value.JobTaskUpdated.DeadLine.ToDateTimeOffset() == DateTimeOffset.FromUnixTimeSeconds(0) ? null : message.Value.JobTaskUpdated.DeadLine.ToDateTimeOffset(),
+            Deadline: message.Value.JobTaskUpdated.DeadLine?.ToDateTimeOffset() == DateTimeOffset.FromUnixTimeSeconds(0) ? null : message.Value.JobTaskUpdated.DeadLine?.ToDateTimeOffset(),
             IsAgreed: message.Value.JobTaskUpdated.IsAgreed,
             UpdatedAt: message.Value.JobTaskUpdated.UpdatedAt.ToDateTimeOffset());
     }

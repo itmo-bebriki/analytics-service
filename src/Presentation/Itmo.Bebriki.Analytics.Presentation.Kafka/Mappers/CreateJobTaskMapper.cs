@@ -7,7 +7,7 @@ namespace Itmo.Bebriki.Analytics.Presentation.Kafka.Mappers;
 public static class CreateJobTaskMapper
 {
     public static CreateJobTaskCommand ToCommand(
-        IKafkaConsumerMessage<JobTaskInfoKey, JobTaskInfoValue> message)
+        IKafkaInboxMessage<JobTaskInfoKey, JobTaskInfoValue> message)
     {
         return new CreateJobTaskCommand(
             JobTaskId: message.Key.JobTaskId,

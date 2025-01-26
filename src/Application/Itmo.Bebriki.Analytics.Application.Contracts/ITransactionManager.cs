@@ -1,4 +1,4 @@
-using System.Transactions;
+using System.Data;
 
 namespace Itmo.Bebriki.Analytics.Application.Contracts;
 

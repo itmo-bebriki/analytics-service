@@ -14,6 +14,7 @@ public class TableEventHistory : SqlMigration
         """
         CREATE TABLE event_history (
             id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+            job_task_id BIGINT NOT NULL,
             type event_type NOT NULL,
             occurred_at TIMESTAMP WITH TIME ZONE NOT NULL,
             payload JSONB NOT NULL
