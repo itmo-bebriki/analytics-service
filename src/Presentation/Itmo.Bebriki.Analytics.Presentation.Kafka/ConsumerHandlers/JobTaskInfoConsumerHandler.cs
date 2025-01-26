@@ -88,7 +88,7 @@ public class JobTaskInfoConsumerHandler
         _logger.LogInformation($"Adding new dependency {message.Value.JobTaskDependenciesRemoved.RemovedDependencies} " +
                                $"to {message.Value.JobTaskDependenciesRemoved.JobTaskId}");
 
-        await _service.ProcessNewDependencyAsync(
+        await _service.ProcessPruneDependencyAsync(
             DependencyCommandMapper.ToCommand(message),
             cancellationToken);
     }
