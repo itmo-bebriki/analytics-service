@@ -16,6 +16,13 @@ public class AnalyticsService : IAnalyticsService
         _analyticsRepository = analyticsRepository;
     }
 
+    public async Task<TaskAnalytics> GetAnalyticsByIdAsync(long id, CancellationToken cancellationToken)
+    {
+        return await _analyticsRepository.QueryAsync(
+            new FetchAnalyticsQuery(id),
+            cancellationToken);
+    }
+
     public async Task ProcessCreationAsync(CreateJobTaskCommand command, CancellationToken cancellationToken)
     {
         await _analyticsRepository.UpsertAsync(
@@ -57,7 +64,7 @@ public class AnalyticsService : IAnalyticsService
                 StartedAt: command.State.Equals(JobTaskState.InProgress) ? command.UpdatedAt : null,
                 TimeSpent: command.State.Equals(JobTaskState.Done) ? command.UpdatedAt - current.StartedAt : null,
                 CreatedAt: null,
-                Priority: command.Priority,
+                Priority: command.Priority > current.HighestPriority ? command.Priority : null,
                 State: command.State,
                 AmountOfAgreements: current.AmountOfAgreements + (command.IsAgreed.Equals(null) ? 0 : 1),
                 TotalUpdates: current.TotalUpdates + 1),

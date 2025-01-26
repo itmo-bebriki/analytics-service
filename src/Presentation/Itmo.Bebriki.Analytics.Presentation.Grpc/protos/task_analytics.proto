@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+option csharp_namespace = "Itmo.Bebriki.Analytics.Grpc.Contracts";
+
+package itmo.bebriki.analytics.grpc;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+service TaskAnalyticsService {
+  rpc GetAnalytics(GetAnalyticsRequest) returns (GetAnalyticsResponse);
+}
+
+message GetAnalyticsRequest {
+  int64 task_id = 1;
+}
+
+message GetAnalyticsResponse {
+  google.protobuf.Timestamp created_at = 1;
+  google.protobuf.Timestamp last_update = 2;
+  google.protobuf.Timestamp started_at = 3;
+  google.protobuf.Duration time_spent = 4;
+  JobTaskPriority highest_priority = 5;
+  JobTaskState current_state = 6;
+  int32 amount_of_agreements = 7;
+  int32 total_updates = 8;
+  int32 amount_of_unique_assignees = 9;
+  int32 amount_of_unique_dependencies = 10;
+}
+
+enum JobTaskState {
+  JOB_TASK_STATE_UNSPECIFIED = 0;
+  JOB_TASK_STATE_BACKLOG = 1;
+  JOB_TASK_STATE_TO_DO = 2;
+  JOB_TASK_STATE_IN_PROGRESS = 3;
+  JOB_TASK_STATE_IN_REVIEW = 4;
+  JOB_TASK_STATE_DONE = 5;
+  JOB_TASK_STATE_CLOSED = 6;
+}
+
+enum JobTaskPriority {
+  JOB_TASK_PRIORITY_UNSPECIFIED = 0;
+  JOB_TASK_PRIORITY_LOW = 1;
+  JOB_TASK_PRIORITY_MEDIUM = 2;
+  JOB_TASK_PRIORITY_HIGH = 3;
+  JOB_TASK_PRIORITY_CRITICAL = 4;
+}

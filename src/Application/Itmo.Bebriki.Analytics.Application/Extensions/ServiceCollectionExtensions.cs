@@ -7,6 +7,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddApplication(this IServiceCollection collection)
     {
+        collection.AddScoped<AnalyticsService>();
         collection.AddScoped<IAnalyticsService, HistoryTrackingServiceWrapper>();
         collection.AddScoped<ITransactionManager, TransactionManager>();
 

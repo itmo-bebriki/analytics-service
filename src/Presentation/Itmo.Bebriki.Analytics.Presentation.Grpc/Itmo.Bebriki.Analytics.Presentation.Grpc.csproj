@@ -1,11 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
-        <Folder Include="protos\"/>
-    </ItemGroup>
-
-    <ItemGroup>
         <PackageReference Include="Google.Protobuf" />
+        <PackageReference Include="Grpc.Tools"/>
         <PackageReference Include="Grpc.AspNetCore"/>
         <PackageReference Include="Grpc.AspNetCore.Server.Reflection"/>
     </ItemGroup>

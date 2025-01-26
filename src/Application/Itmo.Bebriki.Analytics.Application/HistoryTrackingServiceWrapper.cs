@@ -1,8 +1,10 @@
 using Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Queries;
 using Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Repositories;
 using Itmo.Bebriki.Analytics.Application.Contracts;
+using Itmo.Bebriki.Analytics.Application.Models.Analytics;
 using Itmo.Bebriki.Analytics.Application.Models.Commands;
 using Itmo.Bebriki.Analytics.Application.Models.EventHistory;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Itmo.Bebriki.Analytics.Application;
 
@@ -12,11 +14,16 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
     private readonly IEventHistoryRepository _eventHistoryRepository;
 
     public HistoryTrackingServiceWrapper(
-        IAnalyticsService wrappee,
+        IServiceProvider provider,
         IEventHistoryRepository eventHistoryRepository)
     {
-        _wrappee = wrappee;
+        _wrappee = provider.GetRequiredService<AnalyticsService>();
         _eventHistoryRepository = eventHistoryRepository;
+    }
+
+    public async Task<TaskAnalytics> GetAnalyticsByIdAsync(long id, CancellationToken cancellationToken)
+    {
+        return await _wrappee.GetAnalyticsByIdAsync(id, cancellationToken);
     }
 
     public async Task ProcessCreationAsync(CreateJobTaskCommand command, CancellationToken cancellationToken)

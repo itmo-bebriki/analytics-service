@@ -76,7 +76,7 @@ public class JobTaskInfoConsumerHandler
                 UpdateJobTaskMapper.ToCommand(message),
                 cancellationToken),
             cancellationToken,
-            isolationLevel: IsolationLevel.ReadUncommitted);
+            isolationLevel: IsolationLevel.RepeatableRead);
     }
 
     private async Task HandleNewDependency(
@@ -91,7 +91,7 @@ public class JobTaskInfoConsumerHandler
                 DependencyCommandMapper.ToCommand(message),
                 cancellationToken),
             cancellationToken,
-            isolationLevel: IsolationLevel.ReadUncommitted);
+            isolationLevel: IsolationLevel.RepeatableRead);
     }
 
     private async Task HandlePruneDependency(
@@ -106,6 +106,6 @@ public class JobTaskInfoConsumerHandler
                 DependencyCommandMapper.ToCommand(message),
                 cancellationToken),
             cancellationToken,
-            isolationLevel: IsolationLevel.ReadUncommitted);
+            isolationLevel: IsolationLevel.RepeatableRead);
     }
 }

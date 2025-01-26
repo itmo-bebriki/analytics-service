@@ -2,9 +2,9 @@ using Itmo.Bebriki.Analytics.Application.Models.JobTask;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Kafka.Mappers;
 
-public static class JobTaskPriorityMapper
+internal static class JobTaskPriorityMapper
 {
-    public static JobTaskPriority? ToInternal(
+    internal static JobTaskPriority? ToInternal(
         Itmo.Bebriki.Analytics.Kafka.Contracts.JobTaskPriority jobTaskPriority)
     {
         return jobTaskPriority switch

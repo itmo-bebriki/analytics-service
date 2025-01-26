@@ -1,3 +1,4 @@
+using Itmo.Bebriki.Analytics.Presentation.Grpc.Controllers;
 using Microsoft.AspNetCore.Builder;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Grpc.Extensions;
@@ -8,8 +9,7 @@ public static class ApplicationBuilderExtensions
     {
         builder.UseEndpoints(routeBuilder =>
         {
-            // TODO: add gRPC services implementation
-            // routeBuilder.MapGrpcService<Sample>();
+            routeBuilder.MapGrpcService<AnalyticsController>();
             routeBuilder.MapGrpcReflectionService();
         });
 
