@@ -2,8 +2,9 @@ namespace Itmo.Bebriki.Analytics.Application.Models.EventHistory;
 
 public enum EventType
 {
-    Creation = 0,
-    Update = 1,
-    NewDependency = 2,
-    PruneDependency = 3,
+    None = 0,
+    Creation = 1,
+    Update = 2,
+    NewDependency = 3,
+    PruneDependency = 4,
 }

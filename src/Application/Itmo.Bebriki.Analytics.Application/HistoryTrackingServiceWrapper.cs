@@ -31,6 +31,11 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
         return await _wrappee.GetAnalyticsByIdAsync(id, cancellationToken);
     }
 
+    public async Task<PagedHistoryEvents> GetHistoryByIdAsync(FetchHistoryCommand command, CancellationToken cancellationToken)
+    {
+        return await _wrappee.GetHistoryByIdAsync(command, cancellationToken);
+    }
+
     public async Task ProcessCreationAsync(CreateJobTaskCommand command, CancellationToken cancellationToken)
     {
         await using IPersistenceTransaction transaction = await _transactionProvider.BeginTransactionAsync(

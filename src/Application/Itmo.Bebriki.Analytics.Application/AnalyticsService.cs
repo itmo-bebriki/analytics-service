@@ -1,8 +1,10 @@
 using Itmo.Bebriki.Analytics.Application.Abstractions.Persistence;
 using Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Queries;
 using Itmo.Bebriki.Analytics.Application.Contracts;
+using Itmo.Bebriki.Analytics.Application.Mappers;
 using Itmo.Bebriki.Analytics.Application.Models.Analytics;
 using Itmo.Bebriki.Analytics.Application.Models.Commands;
+using Itmo.Bebriki.Analytics.Application.Models.EventHistory;
 using Itmo.Bebriki.Analytics.Application.Models.JobTask;
 
 namespace Itmo.Bebriki.Analytics.Application;
@@ -21,6 +23,30 @@ public class AnalyticsService : IAnalyticsService
         return await _context.AnalyticsRepository.QueryAsync(
             new FetchAnalyticsQuery(id),
             cancellationToken);
+    }
+
+    public async Task<PagedHistoryEvents> GetHistoryByIdAsync(FetchHistoryCommand command, CancellationToken cancellationToken)
+    {
+        HashSet<PayloadEvent> events = await _context.EventHistoryRepository.QueryAsync(
+            new FetchQuery(
+                Ids: command.Ids,
+                Types: command.Types,
+                FromTimestamp: command.FromTimestamp,
+                ToTimestamp: command.ToTimestamp,
+                PageSize: command.PageSize),
+            cancellationToken)
+            .Select(e => new PayloadEvent(
+                Id: e.Id,
+                EventType: e.EventType,
+                Timestamp: e.Timestamp,
+                Command: PayloadMapper.ToCommand(e.Payload, e.EventType)))
+            .ToHashSetAsync(cancellationToken);
+
+        long? cursor = events.Count == command.PageSize && events.Count > 0
+            ? events.Last().Id
+            : null;
+
+        return new PagedHistoryEvents(cursor, events);
     }
 
     public async Task ProcessCreationAsync(CreateJobTaskCommand command, CancellationToken cancellationToken)

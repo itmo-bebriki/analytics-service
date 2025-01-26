@@ -15,7 +15,13 @@ using Newtonsoft.Json;
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOptions<JsonSerializerSettings>();
-builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<JsonSerializerSettings>>().Value);
+builder.Services.AddSingleton(sp =>
+{
+    JsonSerializerSettings settings = sp.GetRequiredService<IOptions<JsonSerializerSettings>>().Value;
+    settings.TypeNameHandling = TypeNameHandling.Auto;
+
+    return settings;
+});
 
 builder.Services.AddPlatform();
 builder.AddPlatformObservability();

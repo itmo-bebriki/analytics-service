@@ -1,26 +1,29 @@
 using Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Queries;
 using Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Repositories;
-using Itmo.Bebriki.Analytics.Application.Models.Commands;
 using Itmo.Bebriki.Analytics.Application.Models.EventHistory;
 using Itmo.Dev.Platform.Persistence.Abstractions.Commands;
 using Itmo.Dev.Platform.Persistence.Abstractions.Connections;
+using Newtonsoft.Json;
 using System.Data;
 using System.Data.Common;
 using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace Itmo.Bebriki.Analytics.Infrastructure.Persistence.Repositories;
 
 public class EventHistoryRepository : IEventHistoryRepository
 {
     private readonly IPersistenceConnectionProvider _connectionProvider;
+    private readonly JsonSerializerSettings _settings;
 
-    public EventHistoryRepository(IPersistenceConnectionProvider connectionProvider)
+    public EventHistoryRepository(
+        IPersistenceConnectionProvider connectionProvider,
+        JsonSerializerSettings settings)
     {
         _connectionProvider = connectionProvider;
+        _settings = settings;
     }
 
-    public async IAsyncEnumerable<PayloadEvent> QueryAsync(
+    public async IAsyncEnumerable<FetchedEvent> QueryAsync(
         FetchQuery ctx,
         [EnumeratorCancellation] CancellationToken cancellationToken)
     {
@@ -34,8 +37,8 @@ public class EventHistoryRepository : IEventHistoryRepository
         WHERE
             (CARDINALITY(:ids) = 0 OR eh.job_task_id = ANY(:ids))
             AND (CARDINALITY(:types) = 0 OR eh.type = ANY(:types))
-            AND (:from_timestamp IS NULL OR eh.from_timestamp >= :from_timestamp)
-            AND (:to_timestamp IS NULL OR eh.to_timestamp <= :to_timestamp)
+            AND (:from_timestamp IS NULL OR eh.occurred_at >= :from_timestamp)
+            AND (:to_timestamp IS NULL OR eh.occurred_at <= :to_timestamp)
         LIMIT :page_size;
         """;
 
@@ -52,11 +55,11 @@ public class EventHistoryRepository : IEventHistoryRepository
 
         while (await reader.ReadAsync(cancellationToken))
         {
-            yield return new PayloadEvent(
-                Id: reader.GetInt64("id"),
+            yield return new FetchedEvent(
+                Id: reader.GetInt64("job_task_id"),
                 EventType: reader.GetFieldValue<EventType>("type"),
                 Timestamp: reader.GetFieldValue<DateTimeOffset>("occurred_at"),
-                Command: JsonSerializer.Deserialize<BaseCommand>(reader.GetString("payload")) ?? throw new ArgumentException("payload cannot be empty"));
+                Payload: reader.GetString("payload"));
         }
     }
 
@@ -80,7 +83,11 @@ public class EventHistoryRepository : IEventHistoryRepository
             .AddParameter("job_task_id", ctx.Event.Id)
             .AddParameter("evt_type", ctx.Event.EventType)
             .AddParameter("occurred_at", ctx.Event.Timestamp)
-            .AddParameter("payload", JsonSerializer.Serialize(ctx.Event.Command));
+            .AddParameter("payload", JsonConvert.SerializeObject(
+                ctx.Event.Command,
+                ctx.Event.GetType(),
+                Formatting.Indented,
+                _settings));
 
         await cmd.ExecuteNonQueryAsync(cancellationToken);
     }

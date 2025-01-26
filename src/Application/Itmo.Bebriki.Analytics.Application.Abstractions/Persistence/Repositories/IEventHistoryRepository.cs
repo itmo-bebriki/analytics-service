@@ -5,7 +5,7 @@ namespace Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Repositori
 
 public interface IEventHistoryRepository
 {
-    public IAsyncEnumerable<PayloadEvent> QueryAsync(FetchQuery ctx, CancellationToken cancellationToken);
+    public IAsyncEnumerable<FetchedEvent> QueryAsync(FetchQuery ctx, CancellationToken cancellationToken);
 
     public Task AddEventAsync(AddEventQuery ctx, CancellationToken cancellationToken);
 }
