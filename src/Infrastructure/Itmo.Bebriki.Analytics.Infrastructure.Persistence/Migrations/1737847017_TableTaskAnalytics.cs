@@ -17,7 +17,7 @@ public class TableTaskAnalytics : SqlMigration
             created_at TIMESTAMP WITH TIME ZONE,
             last_update TIMESTAMP WITH TIME ZONE,
             started_at TIMESTAMP WITH TIME ZONE,
-            time_spent TIMESTAMP WITH TIME ZONE,
+            time_spent INTERVAL DEFAULT '0',
             highest_priority job_task_priority DEFAULT 'none',
             current_state job_task_state DEFAULT 'none',
             amount_of_agreements INTEGER DEFAULT 0,

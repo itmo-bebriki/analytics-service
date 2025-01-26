@@ -49,7 +49,7 @@ public class AnalyticsRepository : IAnalyticsRepository
             CreatedAt: reader.GetFieldValue<DateTimeOffset>("created_at"),
             LastUpdate: reader.GetFieldValue<DateTimeOffset>("last_update"),
             StartedAt: reader.GetFieldValue<DateTimeOffset>("started_at"),
-            TimeSpent: reader.GetFieldValue<DateTimeOffset>("time_spent"),
+            TimeSpent: reader.GetFieldValue<TimeSpan>("time_spent"),
             HighestPriority: reader.GetFieldValue<JobTaskPriority>("highest_priority"),
             CurrentState: reader.GetFieldValue<JobTaskState>("current_state"),
             AmountOfAgreements: reader.GetInt32("amount_of_agreements"),
@@ -58,19 +58,29 @@ public class AnalyticsRepository : IAnalyticsRepository
             AmountOfUniqueDependencies: reader.GetInt32("amount_of_unique_dependencies"));
     }
 
-    public async Task UpdateAsync(UpdateAnalyticsQuery ctx, CancellationToken cancellationToken)
+    public async Task UpsertAsync(UpsertAnalyticsQuery ctx, CancellationToken cancellationToken)
     {
         const string sql = """
-        UPDATE task_analytics
-        SET created_at = :created_at,
-            last_update = :last_update,
-            started_at = :started_at,
-            time_spent = :time_spent,
-            highest_priority = :highest_priority,
-            current_state = :current_state,
-            amount_of_agreements = :amount_of_agreements,
-            total_updates = :total_updates
-        WHERE id = :id;
+        INSERT INTO task_analytics
+        VALUES (
+            COALESCE(:created_at, task_analytics.created_at),
+            COALESCE(:last_update, task_analytics.last_update),
+            COALESCE(:started_at, task_analytics.started_at),
+            COALESCE(:time_spent, task_analytics.time_spent),
+            COALESCE(:highest_priority, task_analytics.highest_priority),
+            COALESCE(:current_state, task_analytics.current_state),
+            COALESCE(:amount_of_agreements, task_analytics.amount_of_agreements),
+            COALESCE(:total_updates, task_analytics.total_updates)
+        )
+        ON CONFLICT (id) DO UPDATE
+        SET created_at = EXCLUDED.created_at,
+            last_update = EXCLUDED.last_update,
+            started_at = EXCLUDED.started_at,
+            time_spent = EXCLUDED.time_spent,
+            highest_priority = EXCLUDED.highest_priority,
+            current_state = EXCLUDED.current_state,
+            amount_of_agreements = EXCLUDED.amount_of_agreements,
+            total_updates = EXCLUDED.total_updates;
         """;
 
         await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);
@@ -125,6 +135,43 @@ public class AnalyticsRepository : IAnalyticsRepository
         await using IPersistenceCommand cmd = conn.CreateCommand(sql)
             .AddParameter("id", ctx.Id)
             .AddParameter("dependency_ids", ctx.Dependencies);
+
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async Task AddAssigneeAsync(AddAssigneeQuery ctx, CancellationToken cancellationToken)
+    {
+        // Remove assignee entry if it exists so there will be no duplicates.
+        await RemoveAssigneeAsync(new RemoveAssigneeQuery(ctx.Id, ctx.AssigneeId), cancellationToken);
+
+        const string sql = """
+        UPDATE task_analytics
+        SET task_analytics.assignees = array_append(task_analytics.assignees, :assignee_id)
+        WHERE task_analytics.id = :id;
+        """;
+
+        await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);
+
+        await using IPersistenceCommand cmd = conn.CreateCommand(sql)
+            .AddParameter("id", ctx.Id)
+            .AddParameter("assignee_id", ctx.AssigneeId);
+
+        await cmd.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async Task RemoveAssigneeAsync(RemoveAssigneeQuery ctx, CancellationToken cancellationToken)
+    {
+        const string sql = """
+        UPDATE task_analytics
+        SET task_analytics.assignees = array_remove(task_analytics.assignees, :assignee_id)
+        WHERE task_analytics.id = :id;
+        """;
+
+        await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);
+
+        await using IPersistenceCommand cmd = conn.CreateCommand(sql)
+            .AddParameter("id", ctx.Id)
+            .AddParameter("assignee_id", ctx.AssigneeId);
 
         await cmd.ExecuteNonQueryAsync(cancellationToken);
     }

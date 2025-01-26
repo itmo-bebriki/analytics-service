@@ -2,14 +2,13 @@ using Itmo.Bebriki.Analytics.Application.Models.JobTask;
 
 namespace Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Queries;
 
-public record UpdateAnalyticsQuery(
+public record UpsertAnalyticsQuery(
     long Id,
     DateTimeOffset? CreatedAt,
     DateTimeOffset? UpdatedAt,
     DateTimeOffset? StartedAt,
-    DateTimeOffset? TimeSpent,
+    TimeSpan? TimeSpent,
     JobTaskPriority? Priority,
     JobTaskState? State,
     int? AmountOfAgreements,
-    int? TotalUpdates,
-    int? AmountOfUniqueAssignees);
+    int? TotalUpdates);

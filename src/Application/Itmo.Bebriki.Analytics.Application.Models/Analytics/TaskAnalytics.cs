@@ -7,7 +7,7 @@ public record TaskAnalytics(
     DateTimeOffset CreatedAt,
     DateTimeOffset LastUpdate,
     DateTimeOffset StartedAt,
-    DateTimeOffset TimeSpent,
+    TimeSpan TimeSpent,
     JobTaskPriority HighestPriority,
     JobTaskState CurrentState,
     int AmountOfAgreements,

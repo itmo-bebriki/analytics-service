@@ -1,5 +1,7 @@
 using Itmo.Bebriki.Analytics.Application.Abstractions.Persistence;
+using Itmo.Bebriki.Analytics.Application.Abstractions.Persistence.Repositories;
 using Itmo.Bebriki.Analytics.Infrastructure.Persistence.Plugins;
+using Itmo.Bebriki.Analytics.Infrastructure.Persistence.Repositories;
 using Itmo.Dev.Platform.Persistence.Abstractions.Extensions;
 using Itmo.Dev.Platform.Persistence.Postgres.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,8 +18,10 @@ public static class ServiceCollectionExtensions
                 .WithMigrationsFrom(typeof(IAssemblyMarker).Assembly)
                 .WithDataSourcePlugin<MappingPlugin>()));
 
-        // TODO: add repositories
         collection.AddScoped<IPersistenceContext, PersistenceContext>();
+
+        collection.AddScoped<IEventHistoryRepository, EventHistoryRepository>();
+        collection.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
 
         return collection;
     }
