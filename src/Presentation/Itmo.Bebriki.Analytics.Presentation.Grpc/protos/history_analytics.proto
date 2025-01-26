@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+option csharp_namespace = "Itmo.Bebriki.Analytics.Grpc.Contracts";
+
+package itmo.bebriki.analytics.grpc;
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+import "task_analytics.proto";
+
+service HistoryAnalyticsService {
+  rpc GetHistory(GetHistoryRequest) returns (GetHistoryResponse);
+}
+
+message GetHistoryRequest {
+  repeated int64 ids = 1;
+  repeated EventType event_types = 2;
+  google.protobuf.Timestamp from_timestamp = 3;
+  google.protobuf.Timestamp to_timestamp = 4;
+  int32 page_size = 5;
+}
+
+message GetHistoryResponse {
+  int64 cursor = 1;
+  repeated Payload payloads = 2;
+}
+
+message Payload {
+  int64 id = 1;
+  EventType event_type = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  
+  oneof payload_type {
+    CreatePayload create = 4;
+    UpdatePayload update = 5;
+    DependencyPayload dependency = 6;
+  }
+  
+  message CreatePayload {
+    int64 job_task_id = 1;
+    string title = 2;
+    string description = 3;
+    int64 assignee_id = 4;
+    itmo.bebriki.analytics.grpc.JobTaskPriority priority = 5;
+    repeated int64 depends_on_ids = 6;
+    google.protobuf.Timestamp deadline = 7;
+    google.protobuf.Timestamp created_at = 8;
+  }
+  
+  message UpdatePayload {
+    int64 job_task_id = 1;
+    google.protobuf.StringValue title = 2;
+    google.protobuf.StringValue description = 3;
+    google.protobuf.Int64Value assignee_id = 4;
+    JobTaskState state = 5;
+    JobTaskPriority priority = 6;
+    google.protobuf.Timestamp dead_line = 7;
+    google.protobuf.BoolValue is_agreed = 8;
+    google.protobuf.Timestamp updated_at = 9;
+  }
+  
+  message DependencyPayload {
+    int64 job_task_id = 1;
+    repeated int64 changed_dependencies = 2;
+  }
+}
+
+enum EventType {
+  EVENT_TYPE_UNSPECIFIED = 0;
+  EVENT_TYPE_CREATION = 1;
+  EVENT_TYPE_UPDATE = 2;
+  EVENT_TYPE_NEW_DEPS = 3;
+  EVENT_TYPE_PRUNE_DEPS = 4;
+}
