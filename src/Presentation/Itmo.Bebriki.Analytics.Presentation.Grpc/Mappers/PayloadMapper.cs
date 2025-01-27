@@ -13,7 +13,7 @@ internal static class PayloadMapper
     {
         var tempPayload = new Payload
         {
-            Id = payloadEvent.Id,
+            Id = payloadEvent.JobTaskId,
             EventType = EventTypeMapper.FromInternal(payloadEvent.EventType),
             Timestamp = payloadEvent.Timestamp.ToTimestamp(),
         };

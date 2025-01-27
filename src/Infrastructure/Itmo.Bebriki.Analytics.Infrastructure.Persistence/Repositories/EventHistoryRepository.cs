@@ -29,13 +29,15 @@ public class EventHistoryRepository : IEventHistoryRepository
     {
         const string sql = """
         SELECT
+            eh.id,
             eh.job_task_id,
             eh.type,
             eh.occurred_at,
             eh.payload
         FROM event_history AS eh
         WHERE
-            (CARDINALITY(:ids) = 0 OR eh.job_task_id = ANY(:ids))
+            :cursor < eh.id
+            AND (CARDINALITY(:ids) = 0 OR eh.job_task_id = ANY(:ids))
             AND (CARDINALITY(:types) = 0 OR eh.type = ANY(:types))
             AND (:from_timestamp IS NULL OR eh.occurred_at >= :from_timestamp)
             AND (:to_timestamp IS NULL OR eh.occurred_at <= :to_timestamp)
@@ -45,7 +47,8 @@ public class EventHistoryRepository : IEventHistoryRepository
         await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
         await using IPersistenceCommand cmd = conn.CreateCommand(sql)
-            .AddParameter("ids", ctx.Ids)
+            .AddParameter("cursor", ctx.Cursor)
+            .AddParameter("ids", ctx.JobTaskIds)
             .AddParameter("types", ctx.Types)
             .AddParameter("from_timestamp", ctx.FromTimestamp)
             .AddParameter("to_timestamp", ctx.ToTimestamp)
@@ -56,7 +59,8 @@ public class EventHistoryRepository : IEventHistoryRepository
         while (await reader.ReadAsync(cancellationToken))
         {
             yield return new FetchedEvent(
-                Id: reader.GetInt64("job_task_id"),
+                Id: reader.GetInt64("id"),
+                JobTaskId: reader.GetInt64("job_task_id"),
                 EventType: reader.GetFieldValue<EventType>("type"),
                 Timestamp: reader.GetFieldValue<DateTimeOffset>("occurred_at"),
                 Payload: reader.GetString("payload"));
@@ -80,7 +84,7 @@ public class EventHistoryRepository : IEventHistoryRepository
         await using IPersistenceConnection conn = await _connectionProvider.GetConnectionAsync(cancellationToken);
 
         await using IPersistenceCommand cmd = conn.CreateCommand(sql)
-            .AddParameter("job_task_id", ctx.Event.Id)
+            .AddParameter("job_task_id", ctx.Event.JobTaskId)
             .AddParameter("evt_type", ctx.Event.EventType)
             .AddParameter("occurred_at", ctx.Event.Timestamp)
             .AddParameter("payload", JsonConvert.SerializeObject(

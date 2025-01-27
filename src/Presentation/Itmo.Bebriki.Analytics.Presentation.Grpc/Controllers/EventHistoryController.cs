@@ -29,11 +29,12 @@ public class EventHistoryController : HistoryAnalyticsService.HistoryAnalyticsSe
 
         PagedHistoryEvents pagedHistoryEvents = await _analyticsService.GetHistoryByIdAsync(
             new FetchHistoryCommand(
-                Ids: request.Ids.ToArray(),
+                JobTaskIds: request.Ids.ToArray(),
                 Types: request.EventTypes.Select(EventTypeMapper.ToInternal).ToArray(),
                 FromTimestamp: request.FromTimestamp?.ToDateTimeOffset(),
                 ToTimestamp: request.ToTimestamp?.ToDateTimeOffset(),
-                PageSize: request.PageSize),
+                PageSize: request.PageSize,
+                Cursor: request.Cursor),
             context.CancellationToken);
 
         return new GetHistoryResponse

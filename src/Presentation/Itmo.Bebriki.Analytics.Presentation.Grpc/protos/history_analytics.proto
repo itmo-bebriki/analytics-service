@@ -18,6 +18,7 @@ message GetHistoryRequest {
   google.protobuf.Timestamp from_timestamp = 3;
   google.protobuf.Timestamp to_timestamp = 4;
   int32 page_size = 5;
+  int64 cursor = 6;
 }
 
 message GetHistoryResponse {
