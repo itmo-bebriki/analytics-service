@@ -29,14 +29,16 @@ public class AnalyticsService : IAnalyticsService
     {
         HashSet<PayloadEvent> events = await _context.EventHistoryRepository.QueryAsync(
             new FetchQuery(
-                Ids: command.Ids,
+                JobTaskIds: command.JobTaskIds,
                 Types: command.Types,
                 FromTimestamp: command.FromTimestamp,
                 ToTimestamp: command.ToTimestamp,
+                Cursor: command.Cursor,
                 PageSize: command.PageSize),
             cancellationToken)
             .Select(e => new PayloadEvent(
                 Id: e.Id,
+                JobTaskId: e.JobTaskId,
                 EventType: e.EventType,
                 Timestamp: e.Timestamp,
                 Command: PayloadMapper.ToCommand(e.Payload, e.EventType)))

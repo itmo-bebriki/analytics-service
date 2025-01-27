@@ -47,7 +47,8 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
         await _context.EventHistoryRepository.AddEventAsync(
             new AddEventQuery(
                 new PayloadEvent(
-                    Id: command.JobTaskId,
+                    Id: 0,
+                    JobTaskId: command.JobTaskId,
                     EventType: EventType.Creation,
                     Timestamp: command.CreatedAt,
                     Command: command)),
@@ -67,7 +68,8 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
         await _context.EventHistoryRepository.AddEventAsync(
             new AddEventQuery(
                 new PayloadEvent(
-                    Id: command.JobTaskId,
+                    Id: 0,
+                    JobTaskId: command.JobTaskId,
                     EventType: EventType.Update,
                     Timestamp: command.UpdatedAt,
                     Command: command)),
@@ -87,7 +89,8 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
         await _context.EventHistoryRepository.AddEventAsync(
             new AddEventQuery(
                 new PayloadEvent(
-                    Id: command.JobTaskId,
+                    Id: 0,
+                    JobTaskId: command.JobTaskId,
                     EventType: EventType.NewDependency,
                     Timestamp: command.UpdatedAt,
                     Command: command)),
@@ -104,11 +107,11 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
 
         await _wrappee.ProcessPruneDependencyAsync(command, cancellationToken);
 
-        // TODO: put timestamp to proto contract
         await _context.EventHistoryRepository.AddEventAsync(
             new AddEventQuery(
                 new PayloadEvent(
-                    Id: command.JobTaskId,
+                    Id: 0,
+                    JobTaskId: command.JobTaskId,
                     EventType: EventType.PruneDependency,
                     Timestamp: command.UpdatedAt,
                     Command: command)),
