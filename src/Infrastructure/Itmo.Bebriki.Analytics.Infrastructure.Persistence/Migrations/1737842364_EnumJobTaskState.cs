@@ -13,13 +13,10 @@ public class EnumJobTaskState : SqlMigration
         return
         """
         CREATE TYPE job_task_state AS ENUM (
-            'none',
-            'backlog',
-            'to_do',
-            'in_progress',
-            'in_review',
-            'done',
-            'closed'
+            'unspecified',
+            'pending_approval',
+            'approved',
+            'rejected'
         );
         """;
     }

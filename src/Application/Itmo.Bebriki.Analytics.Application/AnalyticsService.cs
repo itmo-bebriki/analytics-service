@@ -59,7 +59,7 @@ public class AnalyticsService : IAnalyticsService
                 StartedAt: null,
                 TimeSpent: null,
                 Priority: command.Priority,
-                State: JobTaskState.None,
+                State: JobTaskState.PendingApproval,
                 AmountOfAgreements: 0,
                 TotalUpdates: 1),
             cancellationToken);
@@ -87,12 +87,12 @@ public class AnalyticsService : IAnalyticsService
             new UpsertAnalyticsQuery(
                 Id: command.JobTaskId,
                 UpdatedAt: command.UpdatedAt,
-                StartedAt: command.State is >= JobTaskState.InProgress ? command.UpdatedAt : null,
-                TimeSpent: command.State is >= JobTaskState.Done ? command.UpdatedAt - (current is null ? null : current.StartedAt ?? command.UpdatedAt) : null,
+                StartedAt: command.State is JobTaskState.Approved && current?.StartedAt is null ? command.UpdatedAt : null,
+                TimeSpent: command.State is JobTaskState.Approved && current?.StartedAt is null ? command.UpdatedAt - current?.CreatedAt : null,
                 CreatedAt: null,
                 Priority: command.Priority > current?.HighestPriority ? command.Priority : null,
                 State: command.State,
-                AmountOfAgreements: current?.AmountOfAgreements + (command.IsAgreed.Equals(null) ? 0 : 1),
+                AmountOfAgreements: current?.AmountOfAgreements + (command.State.Equals(JobTaskState.Approved) ? 0 : 1),
                 TotalUpdates: current?.TotalUpdates + 1),
             cancellationToken);
 

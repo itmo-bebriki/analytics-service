@@ -1,5 +1,5 @@
 using Itmo.Bebriki.Analytics.Application.Models.Commands;
-using Itmo.Bebriki.Analytics.Kafka.Contracts;
+using Itmo.Bebriki.Tasks.Kafka.Contracts;
 using Itmo.Dev.Platform.Kafka.Consumer;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Kafka.Mappers;

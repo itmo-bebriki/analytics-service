@@ -1,6 +1,6 @@
-using Itmo.Bebriki.Analytics.Grpc.Contracts;
+using Itmo.Bebriki.Analytics.Grpc.Enums;
 
-namespace Itmo.Bebriki.Analytics.Presentation.Grpc.Mapper;
+namespace Itmo.Bebriki.Analytics.Presentation.Grpc.Mappers;
 
 internal static class JobTaskPriorityMapper
 {

@@ -84,13 +84,12 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
 
         await _wrappee.ProcessNewDependencyAsync(command, cancellationToken);
 
-        // TODO: put timestamp to proto contract
         await _context.EventHistoryRepository.AddEventAsync(
             new AddEventQuery(
                 new PayloadEvent(
                     Id: command.JobTaskId,
                     EventType: EventType.NewDependency,
-                    Timestamp: DateTimeOffset.UtcNow,
+                    Timestamp: command.UpdatedAt,
                     Command: command)),
             cancellationToken);
 
@@ -111,7 +110,7 @@ public class HistoryTrackingServiceWrapper : IAnalyticsService
                 new PayloadEvent(
                     Id: command.JobTaskId,
                     EventType: EventType.PruneDependency,
-                    Timestamp: DateTimeOffset.UtcNow,
+                    Timestamp: command.UpdatedAt,
                     Command: command)),
             cancellationToken);
 

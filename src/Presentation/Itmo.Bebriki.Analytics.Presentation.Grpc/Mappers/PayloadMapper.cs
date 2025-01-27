@@ -1,8 +1,8 @@
 using Google.Protobuf.WellKnownTypes;
 using Itmo.Bebriki.Analytics.Application.Models.Commands;
 using Itmo.Bebriki.Analytics.Application.Models.EventHistory;
-using Itmo.Bebriki.Analytics.Grpc.Contracts;
-using Itmo.Bebriki.Analytics.Presentation.Grpc.Mapper;
+using Itmo.Bebriki.Analytics.Contracts;
+using Itmo.Bebriki.Analytics.Grpc.Enums;
 using EventType = Itmo.Bebriki.Analytics.Application.Models.EventHistory.EventType;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Grpc.Mappers;
@@ -48,7 +48,6 @@ internal static class PayloadMapper
                     Priority = updateCmd.Priority is null ? JobTaskPriority.Unspecified : JobTaskPriorityMapper.ToGrpc(updateCmd.Priority.Value),
                     DeadLine = updateCmd.Deadline?.ToTimestamp(),
                     UpdatedAt = updateCmd.UpdatedAt.ToTimestamp(),
-                    IsAgreed = updateCmd.IsAgreed,
                 };
                 break;
             case EventType.NewDependency:

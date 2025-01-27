@@ -19,7 +19,7 @@ public class TableTaskAnalytics : SqlMigration
             started_at TIMESTAMP WITH TIME ZONE,
             time_spent INTERVAL DEFAULT '0',
             highest_priority job_task_priority DEFAULT 'none',
-            current_state job_task_state DEFAULT 'none',
+            current_state job_task_state DEFAULT 'unspecified',
             amount_of_agreements INTEGER DEFAULT 0,
             total_updates INTEGER DEFAULT 0,
             assignees BIGINT[] DEFAULT ARRAY[]::BIGINT[],

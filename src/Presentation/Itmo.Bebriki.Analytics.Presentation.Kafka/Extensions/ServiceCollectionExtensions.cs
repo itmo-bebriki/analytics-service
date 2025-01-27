@@ -1,5 +1,5 @@
-using Itmo.Bebriki.Analytics.Kafka.Contracts;
 using Itmo.Bebriki.Analytics.Presentation.Kafka.ConsumerHandlers;
+using Itmo.Bebriki.Tasks.Kafka.Contracts;
 using Itmo.Dev.Platform.Kafka.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,12 +1,12 @@
 syntax = "proto3";
 
-option csharp_namespace = "Itmo.Bebriki.Analytics.Grpc.Contracts";
+option csharp_namespace = "Itmo.Bebriki.Analytics.Contracts";
 
-package itmo.bebriki.analytics.grpc;
+package itmo.bebriki.analytics;
 
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/timestamp.proto";
-import "task_analytics.proto";
+import "enums.proto";
 
 service HistoryAnalyticsService {
   rpc GetHistory(GetHistoryRequest) returns (GetHistoryResponse);
@@ -41,7 +41,7 @@ message Payload {
     string title = 2;
     string description = 3;
     int64 assignee_id = 4;
-    itmo.bebriki.analytics.grpc.JobTaskPriority priority = 5;
+    itmo.bebriki.analytics.grpc.enums.JobTaskPriority priority = 5;
     repeated int64 depends_on_ids = 6;
     google.protobuf.Timestamp deadline = 7;
     google.protobuf.Timestamp created_at = 8;
@@ -52,8 +52,8 @@ message Payload {
     google.protobuf.StringValue title = 2;
     google.protobuf.StringValue description = 3;
     google.protobuf.Int64Value assignee_id = 4;
-    JobTaskState state = 5;
-    JobTaskPriority priority = 6;
+    itmo.bebriki.analytics.grpc.enums.JobTaskState state = 5;
+    itmo.bebriki.analytics.grpc.enums.JobTaskPriority priority = 6;
     google.protobuf.Timestamp dead_line = 7;
     google.protobuf.BoolValue is_agreed = 8;
     google.protobuf.Timestamp updated_at = 9;
