@@ -93,7 +93,7 @@ public class AnalyticsService : IAnalyticsService
                 TimeSpent: command.State is JobTaskState.Approved && current?.StartedAt is null ? command.UpdatedAt - current?.CreatedAt : null,
                 CreatedAt: null,
                 Priority: command.Priority > current?.HighestPriority ? command.Priority : null,
-                State: current?.CurrentState != command.State ? command.State : null,
+                State: current?.CurrentState != command.State && !command.State.Equals(JobTaskState.Unspecified) ? command.State : null,
                 AmountOfAgreements: current?.AmountOfAgreements + (command.State.Equals(JobTaskState.Approved) ? 0 : 1),
                 TotalUpdates: current?.TotalUpdates + 1),
             cancellationToken);
