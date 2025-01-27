@@ -91,7 +91,7 @@ public class AnalyticsService : IAnalyticsService
                 TimeSpent: command.State is JobTaskState.Approved && current?.StartedAt is null ? command.UpdatedAt - current?.CreatedAt : null,
                 CreatedAt: null,
                 Priority: command.Priority > current?.HighestPriority ? command.Priority : null,
-                State: command.State,
+                State: current?.CurrentState != command.State ? command.State : null,
                 AmountOfAgreements: current?.AmountOfAgreements + (command.State.Equals(JobTaskState.Approved) ? 0 : 1),
                 TotalUpdates: current?.TotalUpdates + 1),
             cancellationToken);
@@ -115,10 +115,10 @@ public class AnalyticsService : IAnalyticsService
 
     public async Task ProcessPruneDependencyAsync(DependencyCommand command, CancellationToken cancellationToken)
     {
-        await _context.AnalyticsRepository.RemoveDependencyAsync(
-            new RemoveDependencyQuery(
-                Id: command.JobTaskId,
-                Dependencies: command.Dependencies),
-            cancellationToken);
+        await Task.Yield();
+
+        // This method is a suppression for analytics.
+        // Since there is a field "amount_of_unique_dependencies",
+        // you don't really need to prune dependencies here.
     }
 }
