@@ -10,6 +10,5 @@ public record UpdateJobTaskCommand(
     JobTaskState? State,
     JobTaskPriority? Priority,
     DateTimeOffset? Deadline,
-    bool? IsAgreed,
     DateTimeOffset UpdatedAt)
     : BaseCommand(JobTaskId);

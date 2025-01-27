@@ -13,6 +13,7 @@ public class EnumEventType : SqlMigration
         return
         """
         CREATE TYPE event_type AS ENUM (
+            'none',
             'creation',
             'update',
             'new_dependency',

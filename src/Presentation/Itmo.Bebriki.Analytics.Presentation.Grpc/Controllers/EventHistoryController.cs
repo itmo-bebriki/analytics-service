@@ -2,7 +2,7 @@ using Grpc.Core;
 using Itmo.Bebriki.Analytics.Application.Contracts;
 using Itmo.Bebriki.Analytics.Application.Models.Commands;
 using Itmo.Bebriki.Analytics.Application.Models.EventHistory;
-using Itmo.Bebriki.Analytics.Grpc.Contracts;
+using Itmo.Bebriki.Analytics.Contracts;
 using Itmo.Bebriki.Analytics.Presentation.Grpc.Mappers;
 using Microsoft.Extensions.Logging;
 

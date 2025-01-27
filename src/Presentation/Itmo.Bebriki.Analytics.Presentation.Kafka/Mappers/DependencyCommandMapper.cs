@@ -1,5 +1,5 @@
 using Itmo.Bebriki.Analytics.Application.Models.Commands;
-using Itmo.Bebriki.Analytics.Kafka.Contracts;
+using Itmo.Bebriki.Tasks.Kafka.Contracts;
 using Itmo.Dev.Platform.Kafka.Consumer;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Kafka.Mappers;
@@ -13,11 +13,13 @@ public static class DependencyCommandMapper
         {
             return new DependencyCommand(
                 JobTaskId: message.Key.JobTaskId,
-                Dependencies: message.Value.JobTaskDependenciesAdded.AddedDependencies.ToArray());
+                Dependencies: message.Value.JobTaskDependenciesAdded.AddedDependencies.ToArray(),
+                UpdatedAt: message.Value.JobTaskDependenciesAdded.UpdatedAt.ToDateTimeOffset());
         }
 
         return new DependencyCommand(
             JobTaskId: message.Key.JobTaskId,
-            Dependencies: message.Value.JobTaskDependenciesRemoved.RemovedDependencies.ToArray());
+            Dependencies: message.Value.JobTaskDependenciesRemoved.RemovedDependencies.ToArray(),
+            UpdatedAt: message.Value.JobTaskDependenciesRemoved.UpdatedAt.ToDateTimeOffset());
     }
 }

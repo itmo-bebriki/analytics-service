@@ -1,4 +1,4 @@
-using Itmo.Bebriki.Analytics.Grpc.Contracts;
+using Itmo.Bebriki.Analytics.Contracts;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Grpc.Mappers;
 

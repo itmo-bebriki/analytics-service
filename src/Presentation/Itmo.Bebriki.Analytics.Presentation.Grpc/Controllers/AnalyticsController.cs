@@ -2,8 +2,9 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Itmo.Bebriki.Analytics.Application.Contracts;
 using Itmo.Bebriki.Analytics.Application.Models.Analytics;
-using Itmo.Bebriki.Analytics.Grpc.Contracts;
-using Itmo.Bebriki.Analytics.Presentation.Grpc.Mapper;
+using Itmo.Bebriki.Analytics.Contracts;
+using Itmo.Bebriki.Analytics.Grpc.Enums;
+using Itmo.Bebriki.Analytics.Presentation.Grpc.Mappers;
 using Microsoft.Extensions.Logging;
 
 namespace Itmo.Bebriki.Analytics.Presentation.Grpc.Controllers;

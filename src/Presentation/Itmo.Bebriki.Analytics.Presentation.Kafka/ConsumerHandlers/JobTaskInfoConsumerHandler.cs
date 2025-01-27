@@ -1,6 +1,6 @@
 using Itmo.Bebriki.Analytics.Application.Contracts;
-using Itmo.Bebriki.Analytics.Kafka.Contracts;
 using Itmo.Bebriki.Analytics.Presentation.Kafka.Mappers;
+using Itmo.Bebriki.Tasks.Kafka.Contracts;
 using Itmo.Dev.Platform.Kafka.Consumer;
 using Microsoft.Extensions.Logging;
 
